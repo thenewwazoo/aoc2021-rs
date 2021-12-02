@@ -43,7 +43,7 @@ mod day1_tests {
 
     use super::*;
 
-    const TEST_DATA_STR: &str = &"199\n\
+    const TEST_DATA_STR: &str = "199\n\
           200\n\
           208\n\
           210\n\

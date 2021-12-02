@@ -2,26 +2,22 @@ use aoc2021::read_lines_from;
 use aoc2021::sub::{Nav, NavParseError, Sub, SubError};
 
 fn main() {
-    println!("Part 1: {}", part1());
-    println!("Part 2: {}", part2());
+    println!("Solution: {}", part1());
 }
 
 fn part1() -> u64 {
     let mut sub: Sub = Sub::default();
-    navigate_sub(
-        &mut sub,
-        lines_to_navs(
-            &read_lines_from("input/day2.txt")
-                .unwrap() // die if we can't read the file
-                .collect::<Result<Vec<String>, std::io::Error>>()
-                .unwrap() // die if there's a bad line
-        ).unwrap()
-    ).unwrap();
-    sub.dist * sub.depth
-}
 
-fn part2() -> usize {
-    10
+    let lines = &read_lines_from("input/day2.txt")
+        .unwrap() // die if we can't read the file
+        .collect::<Result<Vec<String>, std::io::Error>>()
+        .unwrap();
+
+    let navs = lines_to_navs(lines).unwrap(); // die if there's a bad line
+
+    navigate_sub(&mut sub, navs).unwrap();
+
+    sub.dist * sub.depth
 }
 
 fn lines_to_navs(lines: &[String]) -> Result<Vec<Nav>, NavParseError> {
@@ -78,7 +74,7 @@ forward 2";
         let nav_result = navigate_sub(&mut s, test_data);
 
         assert_eq!(nav_result, Ok(()));
-        assert_eq!(s, Sub{dist: 15, depth: 10});
+        assert_eq!(s, Sub{dist: 15, depth: 60, aim: 10});
     }
 
 }
