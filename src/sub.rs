@@ -4,9 +4,9 @@
 pub enum Nav {
     /// Sub moves forward
     Fore(u64),
-    /// Sub moves up (depth decreases)
+    /// Sub aims up (depth decreases)
     Up(u64),
-    /// Sub moves down (depth increases)
+    /// Sub aims down (depth increases)
     Down(u64),
 }
 
@@ -48,7 +48,9 @@ pub struct Sub {
 /// Errors relating to submarines
 #[derive(Debug, PartialEq, Eq)]
 pub enum SubError {
+    /// There's been some kind of a overflow problem w/ the number provided
     Overflow(u64),
+    /// The submarine cannot navigate that way
     Nav(Nav),
 }
 
@@ -56,21 +58,28 @@ impl Sub {
     pub fn try_move(&mut self, m: Nav) -> Result<(), SubError> {
         match m {
             Nav::Fore(d) => {
-                self.dist = self.dist.checked_add(d).ok_or(SubError::Nav(m))?;
 
+                // move forward
+                self.dist = match self.dist.checked_add(d) {
+                    None => return Err(SubError::Nav(m)),
+                    Some(dist) => dist
+                };
+
+                // move up or down
                 let depth_adj: i64 = self.aim * i64::try_from(d).map_err(|_| SubError::Overflow(d))?;
                 if depth_adj > 0 {
                     self.depth = self.depth
                         .checked_add(
-                            depth_adj.try_into().unwrap()
+                            depth_adj as u64 // positive i64 -> u64 cannot fail
                         )
                         .ok_or(SubError::Overflow(d))?;
-                } else {
-                    self.depth = self.depth
-                        .checked_sub(
-                            depth_adj.abs().try_into().unwrap()
-                        ).ok_or(SubError::Overflow(d))?;
+                    } else {
+                        self.depth = self.depth
+                            .checked_sub(
+                                depth_adj.abs() as u64 // abs of i64 -> u64 cannot fail
+                            ).ok_or(SubError::Nav(m))?;
                 }
+
 
             },
             Nav::Up(d) => {
@@ -133,6 +142,16 @@ mod sub_tests {
                 aim: 5,
             },
             s
+        );
+    }
+
+    #[test]
+    fn subs_cannot_fly() {
+        let mut s = Sub { dist: 0, depth: 0, aim: 0 };
+        s.try_move(Nav::Up(1)).unwrap();
+        assert_eq!(
+            Err(SubError::Nav(Nav::Fore(1))),
+            s.try_move(Nav::Fore(1))
         );
     }
 
