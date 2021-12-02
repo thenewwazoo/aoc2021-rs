@@ -39,7 +39,7 @@ fn group_lines(m: &[u64]) -> Vec<u64> {
 }
 
 #[cfg(test)]
-mod tests {
+mod day1_tests {
 
     use super::*;
 
