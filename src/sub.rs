@@ -1,4 +1,3 @@
-
 /// Possible moves your sub can make
 #[derive(Debug, PartialEq, Eq)]
 pub enum Nav {
@@ -18,23 +17,22 @@ impl TryFrom<&str> for Nav {
     type Error = NavParseError;
 
     fn try_from(line: &str) -> Result<Self, Self::Error> {
-
         if let [f, d] = &(line.split(' ').collect::<Vec<&str>>()).as_slice() {
-            let dist = d.parse::<u64>().map_err(|_| NavParseError{})?;
+            let dist = d.parse::<u64>().map_err(|_| NavParseError {})?;
             match *f {
                 "forward" => Ok(Nav::Fore(dist)),
                 "down" => Ok(Nav::Down(dist)),
                 "up" => Ok(Nav::Up(dist)),
-                _ => Err(NavParseError{}),
+                _ => Err(NavParseError {}),
             }
         } else {
-            Err(NavParseError{})
+            Err(NavParseError {})
         }
     }
 }
 
 /// A representation of the state of your submarine
-#[derive(Debug, PartialEq, Eq)]
+#[derive(Debug, Default, Eq, PartialEq)]
 pub struct Sub {
     /// How far forward the sub has travelled
     pub dist: u64,
@@ -43,7 +41,6 @@ pub struct Sub {
     /// The amount of incline the sub has (neg -> pointed up, pos -> pointed down)
     pub aim: i64,
 }
-
 
 /// Errors relating to submarines
 #[derive(Debug, PartialEq, Eq)]
@@ -58,38 +55,39 @@ impl Sub {
     pub fn try_move(&mut self, m: Nav) -> Result<(), SubError> {
         match m {
             Nav::Fore(d) => {
-
                 // move forward
                 self.dist = match self.dist.checked_add(d) {
                     None => return Err(SubError::Nav(m)),
-                    Some(dist) => dist
+                    Some(dist) => dist,
                 };
 
                 // move up or down
-                let depth_adj: i64 = self.aim * i64::try_from(d).map_err(|_| SubError::Overflow(d))?;
+                let depth_adj: i64 =
+                    self.aim * i64::try_from(d).map_err(|_| SubError::Overflow(d))?;
                 if depth_adj > 0 {
-                    self.depth = self.depth
+                    self.depth = self
+                        .depth
                         .checked_add(
-                            depth_adj as u64 // positive i64 -> u64 cannot fail
+                            depth_adj as u64, // positive i64 -> u64 cannot fail
                         )
                         .ok_or(SubError::Overflow(d))?;
-                    } else {
-                        self.depth = self.depth
-                            .checked_sub(
-                                depth_adj.abs() as u64 // abs of i64 -> u64 cannot fail
-                            ).ok_or(SubError::Nav(m))?;
+                } else {
+                    self.depth = self
+                        .depth
+                        .checked_sub(
+                            depth_adj.abs() as u64, // abs of i64 -> u64 cannot fail
+                        )
+                        .ok_or(SubError::Nav(m))?;
                 }
-
-
-            },
+            }
             Nav::Up(d) => {
                 let adj = d.try_into().map_err(|_| SubError::Overflow(d))?;
                 self.aim = self.aim.checked_sub(adj).ok_or(SubError::Overflow(d))?;
-            },
+            }
             Nav::Down(d) => {
                 let adj = d.try_into().map_err(|_| SubError::Overflow(d))?;
                 self.aim = self.aim.checked_add(adj).ok_or(SubError::Overflow(d))?;
-            },
+            }
         }
         Ok(())
     }
@@ -98,16 +96,6 @@ impl Sub {
 impl std::fmt::Display for Sub {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> Result<(), std::fmt::Error> {
         write!(f, "< dist: {}, depth: {} >", self.dist, self.depth)
-    }
-}
-
-impl Default for Sub {
-    fn default() -> Self {
-        Sub{
-            dist: 0,
-            depth: 0,
-            aim: 0,
-        }
     }
 }
 
@@ -132,7 +120,11 @@ mod sub_tests {
 
     #[test]
     fn test_move_sub_down() {
-        let mut s = Sub { dist: 5, depth: 0, aim: 0 };
+        let mut s = Sub {
+            dist: 5,
+            depth: 0,
+            aim: 0,
+        };
         s.try_move(Nav::Down(5)).unwrap();
         s.try_move(Nav::Fore(8)).unwrap();
         assert_eq!(
@@ -147,12 +139,12 @@ mod sub_tests {
 
     #[test]
     fn subs_cannot_fly() {
-        let mut s = Sub { dist: 0, depth: 0, aim: 0 };
+        let mut s = Sub {
+            dist: 0,
+            depth: 0,
+            aim: 0,
+        };
         s.try_move(Nav::Up(1)).unwrap();
-        assert_eq!(
-            Err(SubError::Nav(Nav::Fore(1))),
-            s.try_move(Nav::Fore(1))
-        );
+        assert_eq!(Err(SubError::Nav(Nav::Fore(1))), s.try_move(Nav::Fore(1)));
     }
-
 }
