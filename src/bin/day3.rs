@@ -95,7 +95,7 @@ fn coll_most_fewest(data: &[Option<(bool, bool)>]) -> (Vec<bool>, Vec<bool>) {
 fn filter_pop(data: Vec<Vec<bool>>, idx: usize, pop: bool) -> Vec<Vec<bool>> {
     let t = transpose(&data);
     let mf = most_fewest(&t);
-    data.clone()
+    data
         .into_iter()
         .filter(|v| {
             v[idx]
@@ -153,7 +153,7 @@ mod day3_tests {
 
     #[test]
     fn test_case() {
-        let bitstrs: Vec<Vec<bool>> = TEST_DATA.lines().map(|l| str_to_bitvec(l)).collect();
+        let bitstrs: Vec<Vec<bool>> = TEST_DATA.lines().map(str_to_bitvec).collect();
         let out = transpose(&bitstrs);
         let mf = most_fewest(&out);
         let c = coll_most_fewest(&mf);
@@ -182,12 +182,12 @@ mod day3_tests {
 
     #[test]
     fn test_to_u64() {
-        assert_eq!(to_u64(&vec![true]), 0b1);
-        assert_eq!(to_u64(&vec![true, false]), 0b10);
-        assert_eq!(to_u64(&vec![true, true]), 0b11);
-        assert_eq!(to_u64(&vec![true, false, false]), 0b100);
-        assert_eq!(to_u64(&vec![true, true, true]), 0b111);
-        assert_eq!(to_u64(&vec![true, false, true, true, false]), 0b10110);
+        assert_eq!(to_u64(&[true]), 0b1);
+        assert_eq!(to_u64(&[true, false]), 0b10);
+        assert_eq!(to_u64(&[true, true]), 0b11);
+        assert_eq!(to_u64(&[true, false, false]), 0b100);
+        assert_eq!(to_u64(&[true, true, true]), 0b111);
+        assert_eq!(to_u64(&[true, false, true, true, false]), 0b10110);
     }
 
     #[test]
@@ -236,13 +236,13 @@ mod day3_tests {
 
     #[test]
     fn test_filter_ox() {
-        let bitstrs: Vec<Vec<bool>> = TEST_DATA.lines().map(|l| str_to_bitvec(l)).collect();
+        let bitstrs: Vec<Vec<bool>> = TEST_DATA.lines().map(str_to_bitvec).collect();
         assert_eq!(filter_ox(&bitstrs), vec![true, false, true, true, true]);
     }
 
     #[test]
     fn test_filter_co2() {
-        let bitstrs: Vec<Vec<bool>> = TEST_DATA.lines().map(|l| str_to_bitvec(l)).collect();
+        let bitstrs: Vec<Vec<bool>> = TEST_DATA.lines().map(str_to_bitvec).collect();
         assert_eq!(filter_co2(&bitstrs), vec![false, true, false, true, false]);
     }
 }
