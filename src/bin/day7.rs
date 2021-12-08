@@ -14,7 +14,7 @@ fn solve() -> i64 {
     // whatever.
 
     let mut initial_state = get_num_list(&lines_as_vec("input/day7.txt"));
-    initial_state.sort();
+    initial_state.sort_unstable();
     (*initial_state.first().unwrap()..=*initial_state.as_slice().last().unwrap())
         .map(|dest| calc_fuel_for(&initial_state, dest))
         .min()
@@ -36,7 +36,7 @@ mod day7_tests {
     #[test]
     fn test_case() {
         let test_data = vec![String::from("16,1,2,0,4,2,7,1,2,14")];
-        let mut initial_state = get_num_list::<i64>(&test_data);
+        let initial_state = get_num_list::<i64>(&test_data);
 
         let c = (initial_state.iter().cloned().min().unwrap()
             ..=initial_state.iter().cloned().max().unwrap())
