@@ -64,7 +64,7 @@ fn step_grid(grid: &GridMap) -> (GridMap, usize) {
     loop {
         let flashes = find_flashes(&res);
         flash_cnt += flashes.len();
-        if flashes.len() == 0 {
+        if flashes.is_empty() {
             break;
         }
         apply_flashes(&mut res, flashes);
@@ -160,7 +160,7 @@ mod day11_tests {
 19991
 11111";
         let lines = str_as_vec(test_data);
-        let mut grid = inc_grid(&lines_to_grid(&lines));
+        let grid = inc_grid(&lines_to_grid(&lines));
 
         let mut res = vec![
             (1, 1),
@@ -172,10 +172,10 @@ mod day11_tests {
             (2, 3),
             (3, 3),
         ];
-        res.sort();
+        res.sort_unstable();
 
         let mut found = find_flashes(&grid);
-        found.sort();
+        found.sort_unstable();
 
         assert_eq!(res, found);
     }

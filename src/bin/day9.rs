@@ -198,7 +198,7 @@ mod day9_tests {
         println!("{:?}", bsz);
 
         let mut v: Vec<usize> = bsz.values().cloned().collect();
-        v.sort();
+        v.sort_unstable();
         let p: usize = v
             .into_iter()
             .rev()

@@ -10,7 +10,7 @@ fn part1() -> u64 {
 
     lines
         .iter()
-        .map(|l| find_corruption(l))
+        .map(find_corruption)
         .map(|c| match c {
             Some(')') => 3,
             Some(']') => 57,
@@ -28,10 +28,10 @@ fn part2() -> u64 {
     let mut scores: Vec<u64> = lines
         .iter()
         .filter(|l| find_corruption(l).is_none())
-        .map(|l| complete_line(l))
+        .map(complete_line)
         .map(|cont| score_cont(&cont))
         .collect();
-    scores.sort();
+    scores.sort_unstable();
     scores[scores.len() / 2]
 }
 
