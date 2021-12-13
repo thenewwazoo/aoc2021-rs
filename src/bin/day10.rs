@@ -10,7 +10,7 @@ fn part1() -> u64 {
 
     lines
         .iter()
-        .map(find_corruption)
+        .map(|s| find_corruption(s))
         .map(|c| match c {
             Some(')') => 3,
             Some(']') => 57,
@@ -28,14 +28,13 @@ fn part2() -> u64 {
     let mut scores: Vec<u64> = lines
         .iter()
         .filter(|l| find_corruption(l).is_none())
-        .map(complete_line)
-        .map(|cont| score_cont(&cont))
+        .map(|s| score_cont(&complete_line(s)))
         .collect();
     scores.sort_unstable();
     scores[scores.len() / 2]
 }
 
-fn find_corruption(line: &String) -> Option<char> {
+fn find_corruption(line: &str) -> Option<char> {
     let mut acc = Vec::new();
     line.chars()
         .map(|c| check_last(&mut acc, c))
@@ -81,7 +80,7 @@ fn score_cont(cont: &str) -> u64 {
         .fold(0, |acc, s| acc * 5 + s)
 }
 
-fn complete_line(line: &String) -> String {
+fn complete_line(line: &str) -> String {
     let mut stack = Vec::new();
     line.chars().for_each(|c| match c {
         '(' | '[' | '{' | '<' => {
