@@ -138,44 +138,20 @@ mod day13_tests {
 
     #[test]
     fn test_fold_vert() {
-        let (mut map, _) = parse_input(&str_as_vec(
-            "2,0
-0,1
-2,2",
-        ));
+        let (mut map, _) = parse_input(&str_as_vec("2,0\n0,1\n2,2"));
 
         fold(&mut map, &Fold::Vert(1));
 
-        assert_eq!(
-            map,
-            parse_input(&str_as_vec(
-                "0,0
-0,1
-0,2"
-            ))
-            .0
-        );
+        assert_eq!(map, parse_input(&str_as_vec("0,0\n0,1\n0,2")).0);
     }
 
     #[test]
     fn test_fold_horiz() {
-        let (mut map, _) = parse_input(&str_as_vec(
-            "0,2
-1,0
-2,2",
-        ));
+        let (mut map, _) = parse_input(&str_as_vec("0,2\n1,0\n2,2"));
 
         fold(&mut map, &Fold::Horiz(1));
 
-        assert_eq!(
-            map,
-            parse_input(&str_as_vec(
-                "0,0
-1,0
-2,0"
-            ))
-            .0
-        );
+        assert_eq!(map, parse_input(&str_as_vec("0,0\n1,0\n2,0")).0);
     }
 
     #[test]
