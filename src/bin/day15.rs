@@ -52,6 +52,8 @@ impl PartialOrd for State {
     }
 }
 
+type AdjList = Vec<Vec<Edge>>;
+
 fn shortest_path(adj_list: &AdjList, start: usize, goal: usize) -> Option<usize> {
     // dist[node] = current shortest distance from `start` to `node`
     let mut dist: Vec<_> = (0..adj_list.len()).map(|_| usize::MAX).collect();
@@ -97,8 +99,6 @@ fn shortest_path(adj_list: &AdjList, start: usize, goal: usize) -> Option<usize>
     // Goal not reachable
     None
 }
-
-type AdjList = Vec<Vec<Edge>>;
 
 fn parse(lines: &[String]) -> (AdjList, usize, usize) {
     let width = lines[0].len();

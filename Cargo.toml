@@ -7,3 +7,5 @@ edition = "2021"
 
 [dependencies]
 bit-vec = "0.6.3"
+env_logger = "0.9.0"
+log = "0.4.14"
