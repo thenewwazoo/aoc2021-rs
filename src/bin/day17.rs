@@ -1,12 +1,68 @@
 use aoc2021::lines_as_vec;
 
+use std::collections::{HashMap, VecDeque};
+
 fn main() {
     println!("{}", part1());
 }
 
-fn part1() -> i32 {
+fn part1() -> usize {
     let tgt = parse_line(&lines_as_vec("input/day17.txt")[0]);
-    0
+    println!("tgt is {:?}", tgt);
+
+    //let mut solutions = HashMap::new();
+    let mut solutions = 0;
+
+    let mut iters = 0;
+    /*
+    let mut vq = VecDeque::new();
+    vq.push_back((1, 1));
+
+
+    while !vq.is_empty() && iters < 10000 {
+        let v = vq.pop_front().unwrap();
+        vq.extend(next_v(v));
+    */
+
+    for x in 1i32..tgt.t_r.0 {
+        for y in (tgt.b_l.1)..tgt.b_l.1.abs() {
+            let v = (x, y);
+            let mut world = World::new(&tgt, v);
+            let (_steps, result) = run_world(&mut world);
+            //println!("{:?}", steps);
+            match result {
+                Position::Inside => {
+                    //solutions.insert(v, max_height(&steps));
+                    solutions += 1;
+                }
+                //Position::Short => continue,
+                Position::Past | Position::Short => {
+                    iters += 1;
+                    continue;
+                }
+                _ => unreachable!(),
+            };
+        }
+    }
+
+    println!("{} iters", iters);
+    /*
+    for (&k, &v) in solutions.iter() {
+        println!("{:?} - {:?}", k, v);
+    }
+    */
+    solutions //.len()
+              //println!("\n\n{:?}", solutions);
+}
+
+fn next_v(v: (i32, i32)) -> Vec<(i32, i32)> {
+    if v.0 == v.1 {
+        vec![(v.0, v.1 + 1), (v.0 + 1, v.1 + 1), (v.0 + 1, v.1)]
+    } else if v.0 > v.1 {
+        vec![(v.0 + 1, v.1)]
+    } else {
+        vec![(v.0, v.1 + 1)]
+    }
 }
 
 fn parse_line(line: &str) -> Target {
@@ -56,22 +112,21 @@ struct Target {
 }
 
 impl Target {
-    fn check_past(&self, probe: &Probe) -> bool {
-        println!("{:?} {:?}", self, probe);
+    fn check_past(&self, probe: &Probe) -> Option<Position> {
         if probe.v.0 >= 0 && probe.p.0 > self.t_r.0 {
             // moving right, past the right edge
-            println!("past the right edge");
-            true
+            // println!("past the right edge");
+            Some(Position::Past)
         } else if probe.v.0 <= 0 && probe.p.0 < self.t_l.0 {
             // moving left, past the left edge
-            println!("past the left edge");
-            true
-        } else if probe.v.1 < 0 && probe.p.1 <= self.b_l.1 {
+            // println!("past the left edge");
+            Some(Position::Short)
+        } else if probe.v.1 <= 0 && probe.p.1 <= self.b_l.1 {
             // moving down, past the bottom
-            println!("past the bottom");
-            true
+            // println!("past the bottom");
+            Some(Position::Short)
         } else {
-            false
+            None
         }
     }
 
@@ -81,19 +136,34 @@ impl Target {
             .map(|w| Target::intersect(pre.p, post.p, w[0], w[1])) // find any that intersect our path
             .fold(0u8, |acc, i| acc + i as u8)
         {
-            2 => Some(Position::Past),   // shot straight through it
-            1 => Some(Position::Inside), // landed inside it
+            2 => {
+                // println!("shot through it");
+                Some(Position::Past) // shot straight through it
+            }
+            1 => {
+                // println!("landed inside it");
+                Some(Position::Inside) // landed inside it
+            }
             _ => None,
         }
     }
 
     fn check_colinear(&self, probe: &Probe) -> bool {
-        ((probe.p.0 == self.b_l.0 || probe.p.0 == self.b_r.0)
+        if (probe.p.0 == self.b_l.0 || probe.p.0 == self.b_r.0)
             && probe.p.1 < self.t_l.1
-            && probe.p.1 > self.b_l.1)
-            || ((probe.p.1 == self.t_l.1 || probe.p.1 == self.b_l.1)
-                && probe.p.0 < self.t_r.0
-                && probe.p.0 > self.t_l.0)
+            && probe.p.1 > self.b_l.1
+        {
+            // println!("on left/right edge");
+            true
+        } else if (probe.p.1 == self.t_l.1 || probe.p.1 == self.b_l.1)
+            && probe.p.0 < self.t_r.0
+            && probe.p.0 > self.t_l.0
+        {
+            // println!("on top/bottom edge");
+            true
+        } else {
+            false
+        }
     }
 
     fn intersect(t1: (i32, i32), t2: (i32, i32), p1: (i32, i32), p2: (i32, i32)) -> bool {
@@ -106,6 +176,7 @@ impl Target {
 enum Position {
     Before,
     Inside,
+    Short,
     Past,
 }
 
@@ -130,28 +201,48 @@ impl World {
         let pre = self.probe.clone();
         self.probe.tick();
 
+        match self.target.check_transit(&pre, &self.probe) {
+            Some(Position::Past) => {
+                if self.target.check_colinear(&self.probe) {
+                    Position::Inside
+                } else {
+                    Position::Past
+                }
+            }
+            Some(Position::Inside) => Position::Inside,
+            None => {
+                if let Some(p) = self.target.check_past(&self.probe) {
+                    p // we're past the sides and moving away, or off the bottom and dropping
+                } else {
+                    Position::Before
+                }
+            }
+            _ => unreachable!(),
+        }
+
+        /*
         match (
             self.target.check_past(&self.probe),
             self.target.check_transit(&pre, &self.probe),
             self.target.check_colinear(&self.probe),
         ) {
-            (true, _, false) | (false, Some(Position::Past), _) => Position::Past,
-            (true, _, true) | (false, None, true) => Position::Inside,
-            (false, None, false) => Position::Before,
-            (false, Some(Position::Inside), _) => Position::Inside,
-            (false, Some(Position::Before), _) => unreachable!(),
+            (Some(Position::Short), _, _) => Position::Short,
+            (Some(Position::Past), _, false) | (None, Some(Position::Past), _) => Position::Past,
+            (Some(_), _, true) | (None, None, true) => Position::Inside,
+            (None, None, false) => Position::Before,
+            (None, Some(Position::Inside), _) => Position::Inside,
+            (None, Some(Position::Before), _) => unreachable!(),
         }
+        */
     }
 }
 
 fn run_world(world: &mut World) -> (Vec<(i32, i32)>, Position) {
     let mut steps = vec![world.probe.p];
     let result = loop {
-        println!("{:?}", world);
         match world.step() {
             Position::Before => steps.push(world.probe.p),
-            Position::Past => break Position::Past,
-            Position::Inside => break Position::Inside,
+            p @ _ => break p,
         }
     };
     steps.push(world.probe.p);
@@ -185,38 +276,45 @@ mod day17_tests {
 
     #[test]
     fn test_check_past() {
-        let world = World::new(
-            &Target {
-                t_l: (20, -5),
-                t_r: (30, -5),
-                b_l: (20, -10),
-                b_r: (30, -10),
-            },
-            (7, 2),
-        );
-        let t = world.target;
+        let t = Target {
+            t_l: (20, -5),
+            t_r: (30, -5),
+            b_l: (20, -10),
+            b_r: (30, -10),
+        };
 
-        assert!(!t.check_past(&Probe {
-            p: (0, 0),
-            v: (7, 2)
-        }));
-        assert!(t.check_past(&Probe {
-            p: (0, 0),
-            v: (-7, 2)
-        }));
-        assert!(t.check_past(&Probe {
-            p: (31, 0),
-            v: (7, 2)
-        }));
-        assert!(t.check_past(&Probe {
-            p: (1, -10),
-            v: (7, -2)
-        }));
+        assert_eq!(
+            None,
+            t.check_past(&Probe {
+                p: (0, 0),
+                v: (7, 2)
+            })
+        );
+        assert_eq!(
+            Some(Position::Short),
+            t.check_past(&Probe {
+                p: (0, 0),
+                v: (0, 2)
+            })
+        );
+        assert_eq!(
+            Some(Position::Past),
+            t.check_past(&Probe {
+                p: (31, 0),
+                v: (7, 2)
+            })
+        );
+        assert_eq!(
+            Some(Position::Short),
+            t.check_past(&Probe {
+                p: (1, -10),
+                v: (7, -2)
+            })
+        );
     }
 
     #[test]
     fn test_case() {
-        println!("\nstarting at (7, 2)");
         let tgt = Target {
             t_l: (20, -5),
             t_r: (30, -5),
@@ -232,7 +330,6 @@ mod day17_tests {
         assert_eq!(8, steps.len());
         assert_eq!(3, max_height(&steps));
 
-        println!("\nstarting at (6, 3)");
         let mut world = World::new(&tgt, (6, 3));
 
         let (steps, result) = run_world(&mut world);
@@ -241,7 +338,6 @@ mod day17_tests {
         assert_eq!((21, -9), world.probe.p);
         assert_eq!(10, steps.len());
 
-        println!("\nstarting at (17, -4)");
         let mut world = World::new(&tgt, (17, -4));
 
         let (steps, result) = run_world(&mut world);
@@ -250,7 +346,6 @@ mod day17_tests {
         assert_eq!((33, -9), world.probe.p);
         assert_eq!(3, steps.len());
 
-        println!("\nstarting at (6, 9)");
         let mut world = World::new(&tgt, (6, 9));
 
         let (steps, result) = run_world(&mut world);
