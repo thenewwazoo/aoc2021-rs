@@ -5,8 +5,6 @@ use aoc2021::lines_as_vec;
  * p_t+1 = < x_t + max(0, |x_0|-t), y_t + y_0 - t >
  */
 
-use std::ops::RangeInclusive;
-
 fn main() {
     println!("{}", part1());
     println!("{}", part2());
@@ -42,7 +40,7 @@ fn part2() -> i32 {
     solns
 }
 
-fn solve_tri(n: i32) -> Option<i32> {
+fn _solve_tri(n: i32) -> Option<i32> {
     let s = f64::sqrt((2.0 * f64::from(n)) + 0.25) - 0.5;
     if s.fract() == 0.0 {
         Some(unsafe { f64::to_int_unchecked::<i32>(s) })
@@ -51,7 +49,7 @@ fn solve_tri(n: i32) -> Option<i32> {
     }
 }
 
-fn find_lowest_tri(from: i32, to: i32) -> Option<i32> {
+fn _find_lowest_tri(from: i32, to: i32) -> Option<i32> {
     let mut i = 0;
     loop {
         i += 1;
@@ -83,6 +81,7 @@ struct Target {
     t_y: i32,
 }
 
+/*
 #[cfg(test)]
 mod day17_tests {
 
@@ -132,3 +131,4 @@ mod day17_tests {
         assert_eq!(45, ((tgt.b_y.abs() - 1) * tgt.b_y.abs()) / 2);
     }
 }
+*/
