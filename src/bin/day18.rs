@@ -128,8 +128,8 @@ fn reduce_sn(items: &mut Items) {
 
 fn reduce_many(lines: &[String]) -> Items {
     lines
-        .into_iter()
-        .map(|line| tokenize(&line))
+        .iter()
+        .map(|line| tokenize(line))
         .reduce(|acc, right| {
             let mut sum = add_nums(&acc, &right);
             reduce_sn(&mut sum);
@@ -195,7 +195,7 @@ mod day18_tests {
     fn test_add() {
         let left = tokenize("[[[[4,3],4],4],[7,[[8,4],9]]]");
         let right = tokenize("[1,1]");
-        let sum = add_nums(left, right);
+        let sum = add_nums(&left, &right);
 
         assert_eq!(tokenize("[[[[[4,3],4],4],[7,[[8,4],9]]],[1,1]]"), sum);
     }
@@ -239,7 +239,7 @@ mod day18_tests {
     fn test_sum_reduce() {
         let left = tokenize("[[[[4,3],4],4],[7,[[8,4],9]]]");
         let right = tokenize("[1,1]");
-        let mut sum = add_nums(left, right);
+        let mut sum = add_nums(&left, &right);
 
         reduce_sn(&mut sum);
         assert_eq!(tokenize("[[[[0,7],4],[[7,8],[6,0]]],[8,1]]"), sum);

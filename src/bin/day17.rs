@@ -29,7 +29,7 @@ fn part2() -> i32 {
                 x += v_x;
                 y += v_y;
                 v_x = if v_x > 0 { v_x - 1 } else { 0 };
-                v_y = v_y - 1;
+                v_y -= 1;
                 if x >= tgt.l_x && x <= tgt.r_x && y <= tgt.t_y && y >= tgt.b_y {
                     solns += 1;
                     break;

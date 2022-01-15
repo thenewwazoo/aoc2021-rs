@@ -242,12 +242,12 @@ CH -> B",
 
         let max = counts
             .iter()
-            .max_by(|a, b| a.1.cmp(&b.1))
+            .max_by(|a, b| a.1.cmp(b.1))
             .map(|(k, _v)| k)
             .unwrap();
         let min = counts
             .iter()
-            .min_by(|a, b| a.1.cmp(&b.1))
+            .min_by(|a, b| a.1.cmp(b.1))
             .map(|(k, _v)| k)
             .unwrap();
         assert_eq!(1588, counts[max] - counts[min]);
